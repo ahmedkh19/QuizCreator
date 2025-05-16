@@ -1,0 +1,40 @@
+{
+  "mcqs": [
+    {
+      "questionNumber": 1,
+      "question": "In the basic <<<CODE>>>SELECT-FROM-WHERE<<<ENDCODE>>> structure, what does the <<<CODE>>>FROM<<<ENDCODE>>> clause specify?",
+      "choices": [
+        "A) The columns to be selected",
+        "B) The conditions for filtering rows",
+        "C) The table(s) to retrieve data from",
+        "D) The order of the results"
+      ],
+      "correctAnswer": "C",
+      "explanation": "The <<<CODE>>>FROM<<<ENDCODE>>> clause specifies the table or tables from which to retrieve data. For example, <<<CODE>>>SELECT * FROM customers<<<ENDCODE>>> retrieves data from the 'customers' table."
+    },
+    {
+      "questionNumber": 2,
+      "question": "What is the SQL keyword used to filter results based on a condition?",
+      "choices": [
+        "A) <<<CODE>>>SELECT<<<ENDCODE>>>",
+        "B) <<<CODE>>>FROM<<<ENDCODE>>>",
+        "C) <<<CODE>>>WHERE<<<ENDCODE>>>",
+        "D) <<<CODE>>>ORDER BY<<<ENDCODE>>>"
+      ],
+      "correctAnswer": "C",
+      "explanation": "The <<<CODE>>>WHERE<<<ENDCODE>>> clause is used to filter records based on specific conditions. Example: <<<CODE>>>SELECT * FROM users WHERE age > 21<<<ENDCODE>>>"
+    },
+    {
+      "questionNumber": 3,
+      "question": "Which SQL statement is used to add new data to a table?",
+      "choices": [
+        "A) <<<CODE>>>SELECT<<<ENDCODE>>>",
+        "B) <<<CODE>>>INSERT<<<ENDCODE>>>",
+        "C) <<<CODE>>>UPDATE<<<ENDCODE>>>",
+        "D) <<<CODE>>>DELETE<<<ENDCODE>>>"
+      ],
+      "correctAnswer": "B",
+      "explanation": "The <<<CODE>>>INSERT<<<ENDCODE>>> statement is used to add new records to a table. Example: <<<CODE>>>INSERT INTO users (name, age) VALUES ('John', 25)<<<ENDCODE>>>"
+    }
+  ]
+}
