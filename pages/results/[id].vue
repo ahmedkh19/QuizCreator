@@ -54,19 +54,38 @@
               <div class="text-gray-700 flex-1 font-medium">
                 <FormattedText :text="answer.question" />
               </div>
-              <CheckCircleIcon v-if="answer.isCorrect" class="w-6 h-6 text-green-500 ml-2" />
-              <XCircleIcon v-else class="w-6 h-6 text-red-500 ml-2" />
+              <div class="flex items-center">
+                <CheckCircleIcon v-if="answer.isCorrect" class="w-6 h-6 text-green-500 ml-2" />
+                <XCircleIcon v-else class="w-6 h-6 text-red-500 ml-2" />
+                <button 
+                  v-if="isIncorrectQuestionsQuiz && !answer.isCorrect"
+                  @click="removeQuestion(index)"
+                  class="ml-2 p-1 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors"
+                  title="Remove from incorrect questions"
+                >
+                  <TrashIcon class="w-5 h-5" />
+                </button>
+              </div>
             </div>
             
-            <div class="text-sm">
-              <p class="text-gray-600">
-                Your answer: <span :class="answer.isCorrect ? 'text-green-700 font-medium' : 'text-red-700 font-medium'">
-                  {{ answer.selected }}
-                </span>
-              </p>
-              <p v-if="!answer.isCorrect" class="text-gray-600">
-                Correct answer: <span class="text-green-700 font-medium">{{ answer.correct }}</span>
-              </p>
+            <div class="text-sm space-y-3 mt-3">
+              <div class="p-3 border rounded-lg" :class="answer.isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'">
+                <p class="text-gray-600 mb-1">
+                  Your answer:
+                </p>
+                <div :class="answer.isCorrect ? 'text-green-700' : 'text-red-700'" class="font-medium">
+                  <FormattedText :text="getChoiceText(answer.questionIndex, answer.selected)" />
+                </div>
+              </div>
+              
+              <div v-if="!answer.isCorrect" class="p-3 border border-green-300 bg-green-50 rounded-lg">
+                <p class="text-gray-600 mb-1">
+                  Correct answer:
+                </p>
+                <div class="text-green-700 font-medium">
+                  <FormattedText :text="getChoiceText(answer.questionIndex, answer.correct)" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -89,24 +108,40 @@
           Browse More Quizzes
         </NuxtLink>
       </div>
+      
+      <!-- Extra info for incorrect questions quiz -->
+      <div v-if="isIncorrectQuestionsQuiz" class="mt-8 p-4 bg-orange-50 border border-orange-200 rounded-xl text-center">
+        <p class="text-orange-700 font-medium mb-2">This is your Incorrect Questions Quiz</p>
+        <p class="text-gray-600 text-sm">Click the <TrashIcon class="w-4 h-4 inline" /> icons next to questions to remove them from your practice list.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from '#app'
-import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, navigateTo } from '#app'
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import FormattedText from '~/components/FormattedText.vue'
+import { useIncorrectQuestions } from '~/composables/useIncorrectQuestions'
 
 const route = useRoute()
 const result = ref(null)
+const quiz = ref(null)
+const isIncorrectQuestionsQuiz = computed(() => quiz.value?.isIncorrectQuestionsQuiz || false)
+const { getIncorrectQuestions, removeIncorrectQuestion, createIncorrectQuestionsQuiz } = useIncorrectQuestions()
 
 const loadResult = () => {
   const results = JSON.parse(localStorage.getItem('quizResults') || '[]')
   const resultIndex = parseInt(route.params.id)
   if (resultIndex >= 0 && resultIndex < results.length) {
     result.value = results[resultIndex]
+    
+    // Load quiz details to check if it's an incorrect questions quiz
+    if (result.value) {
+      const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]')
+      quiz.value = quizzes.find(q => q.id === result.value.quizId)
+    }
   }
 }
 
@@ -117,6 +152,53 @@ const getGrade = (percentage) => {
   if (percentage >= 60) return 'Not Bad! 🎯'
   if (percentage >= 50) return 'Keep Trying! 💪'
   return 'Need More Practice! 📚'
+}
+
+const getChoiceText = (questionIndex, letter) => {
+  // If there's no question index or choices stored, return just the letter
+  if (questionIndex === undefined || 
+      !result.value?.userAnswers[questionIndex]?.choices) {
+    return letter
+  }
+  
+  const choices = result.value.userAnswers[questionIndex].choices
+  
+  // Find the choice that starts with the given letter
+  const choiceIndex = choices.findIndex(choice => choice.charAt(0) === letter)
+  if (choiceIndex !== -1) {
+    return choices[choiceIndex]
+  }
+  
+  return letter
+}
+
+const removeQuestion = (questionIndex) => {
+  if (!isIncorrectQuestionsQuiz.value) return;
+  
+  const incorrectQuestions = getIncorrectQuestions();
+  
+  // Find the question in incorrect questions array by comparing content
+  const targetQuestion = result.value.userAnswers[questionIndex];
+  
+  const indexToRemove = incorrectQuestions.findIndex(q => 
+    q.question === targetQuestion.question
+  );
+  
+  if (indexToRemove !== -1) {
+    removeIncorrectQuestion(indexToRemove);
+    
+    // If there are still incorrect questions, create a new quiz
+    if (getIncorrectQuestions().length > 0) {
+      const updatedQuiz = createIncorrectQuestionsQuiz();
+      if (updatedQuiz) {
+        // Navigate to the new quiz
+        navigateTo(`/quiz/${updatedQuiz.id}`);
+      }
+    } else {
+      // If no more incorrect questions, go back to quizzes
+      navigateTo('/quizzes');
+    }
+  }
 }
 
 onMounted(() => {

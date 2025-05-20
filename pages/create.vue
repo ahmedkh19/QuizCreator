@@ -1,9 +1,48 @@
 <template>
   <div class="max-w-4xl mx-auto animate-fade-in">
-    <h1 class="text-5xl font-display font-bold text-center text-gray-800 mb-2">
+    <h1 class="text-5xl font-display font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-3">
       Create New Quiz
     </h1>
-    <p class="text-center text-gray-600 mb-12">Build your quiz by pasting JSON data below</p>
+    <p class="text-center text-gray-600 mb-4 text-lg">Transform your PDF into an interactive quiz in seconds! ⚡</p>
+    <div class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-8">
+      <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">AI-Powered</span>
+      <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">PDF to Quiz</span>
+      <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">Instant Results</span>
+    </div>
+    
+    <!-- Steps Guide -->
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">✨</span>
+        Create Your Quiz in 3 Simple Steps
+      </h2>
+      <div class="space-y-3">
+        <div class="flex items-start">
+          <span class="bg-white text-primary w-6 h-6 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-md flex-shrink-0">1</span>
+          <p class="text-gray-700">Go to your favorite AI tool (ChatGPT, Claude, Gemini, etc.)</p>
+        </div>
+        <div class="flex items-start">
+          <span class="bg-white text-primary w-6 h-6 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-md flex-shrink-0">2</span>
+          <p class="text-gray-700">Upload your PDF file and paste our AI prompt (click below to copy)</p>
+        </div>
+        <div class="flex items-start">
+          <span class="bg-white text-primary w-6 h-6 rounded-full flex items-center justify-center mr-3 text-sm font-bold shadow-md flex-shrink-0">3</span>
+          <p class="text-gray-700">Copy the generated JSON and paste it here - your quiz is ready!</p>
+        </div>
+      </div>
+      <div class="mt-4 text-center">
+        <button
+          type="button"
+          @click="showPrompt = !showPrompt"
+          class="inline-flex items-center gap-2 bg-white text-primary border-2 border-primary px-6 py-3 rounded-full font-medium hover:bg-primary hover:text-white transition-all duration-200 shadow-md"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+          </svg>
+          {{ showPrompt ? 'Hide' : 'Get' }} AI Prompt
+        </button>
+      </div>
+    </div>
     
     <div class="bg-white rounded-2xl shadow-xl p-8">
       <form @submit.prevent="createQuiz">
@@ -20,44 +59,49 @@
           />
         </div>
         
-        <div class="mb-8">
-          <div class="flex justify-between items-center mb-3">
-            <label class="block text-gray-700 font-medium">Quiz Data (JSON Format)</label>
+        <!-- AI Prompt Section (shown when clicked) -->
+        <div v-if="showPrompt" class="mb-8 p-6 bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl animate-fade-in">
+          <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-primary">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+            AI Quiz Generation Prompt
+          </h3>
+          <p class="text-sm text-gray-600 mb-4">Copy this prompt and paste it in your AI tool along with your PDF content:</p>
+          <div class="relative">
+            <textarea 
+              :value="aiPrompt"
+              readonly
+              class="w-full px-4 py-3 bg-white border border-primary/30 rounded-lg font-mono text-xs text-gray-700 resize-none max-h-64 overflow-y-auto"
+              rows="8"
+            />
             <button
               type="button"
-              @click="showPrompt = !showPrompt"
-              class="text-primary hover:text-primary-dark text-sm font-medium flex items-center gap-1"
+              @click="copyPrompt"
+              class="absolute top-2 right-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors shadow-md"
             >
-              <svg v-if="!showPrompt" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              {{ showPrompt ? 'Hide' : 'Show' }} AI Prompt Template
+              <span v-if="!promptCopied">Copy Prompt</span>
+              <span v-else class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Copied!
+              </span>
             </button>
           </div>
-          
-          <div v-if="showPrompt" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-fade-in">
-            <h3 class="font-medium text-gray-800 mb-2">AI Quiz Generation Prompt</h3>
-            <p class="text-sm text-gray-600 mb-3">Copy this prompt and use it with AI tools to generate quiz questions from your PDF content:</p>
-            <div class="relative">
-              <textarea 
-                :value="aiPrompt"
-                readonly
-                class="w-full px-4 py-3 bg-white border border-blue-300 rounded-lg font-mono text-xs text-gray-700 resize-none"
-                rows="8"
-              />
-              <button
-                type="button"
-                @click="copyPrompt"
-                class="absolute top-2 right-2 px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-primary-dark transition-colors"
-              >
-                {{ promptCopied ? 'Copied!' : 'Copy' }}
-              </button>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">💡 Tip: Paste your PDF text after this prompt to generate quiz questions</p>
+          <div class="mt-4 p-3 bg-white rounded-lg">
+            <p class="text-sm font-medium text-gray-700 mb-2">💡 Quick Tips:</p>
+            <ul class="text-xs text-gray-600 space-y-1">
+              <li>• Upload your PDF to the AI tool first</li>
+              <li>• Paste this prompt after your PDF content</li>
+              <li>• The AI will generate JSON in the exact format needed</li>
+              <li>• Copy the generated JSON and paste it below</li>
+            </ul>
           </div>
+        </div>
+        
+        <div class="mb-8">
+          <label class="block text-gray-700 font-medium mb-3">Quiz Data (JSON Format)</label>
           
           <textarea 
             v-model="jsonData"

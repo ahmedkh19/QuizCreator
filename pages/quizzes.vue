@@ -3,7 +3,27 @@
     <h1 class="text-5xl font-display font-bold text-center text-gray-800 mb-2">
       Browse Quizzes
     </h1>
-    <p class="text-center text-gray-600 mb-12">Choose a quiz to test your knowledge</p>
+    <p class="text-center text-gray-600 mb-6">Choose a quiz to test your knowledge</p>
+    
+    <!-- Practice Incorrect Questions Button -->
+    <div class="flex justify-center mb-12">
+      <button 
+        v-if="incorrectQuestionsCount > 0"
+        @click="createIncorrectQuiz"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-orange-500 text-white 
+               px-6 py-3 rounded-full font-medium
+               hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+      >
+        <ExclamationTriangleIcon class="w-5 h-5" />
+        Practice Incorrect Questions ({{ incorrectQuestionsCount }})
+      </button>
+      <div 
+        v-else
+        class="text-gray-500 text-sm"
+      >
+        Answer questions incorrectly to build your practice quiz
+      </div>
+    </div>
     
     <div v-if="quizzes.length === 0" class="text-center py-16">
       <div class="mb-8">
@@ -27,8 +47,12 @@
         v-for="quiz in quizzes" 
         :key="quiz.id"
         class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+        :class="{ 'border-2 border-orange-400': quiz.isIncorrectQuestionsQuiz }"
       >
-        <div class="bg-gradient-to-r from-primary to-secondary h-2"></div>
+        <div 
+          class="h-2"
+          :class="quiz.isIncorrectQuestionsQuiz ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-primary to-secondary'"
+        ></div>
         <div class="p-6">
           <h3 class="text-2xl font-display font-semibold text-gray-800 mb-4">{{ quiz.title }}</h3>
           <div class="flex items-center space-x-4 text-gray-600 mb-6">
@@ -72,10 +96,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useQuizzes } from '~/composables/useQuizzes'
-import { TrashIcon, BookOpenIcon, DocumentTextIcon } from '@heroicons/vue/24/outline'
+import { useIncorrectQuestions } from '~/composables/useIncorrectQuestions'
+import { TrashIcon, BookOpenIcon, DocumentTextIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 
 const quizzes = ref([])
+const incorrectQuestionsCount = ref(0)
 const { loadPremadeQuizzes } = useQuizzes()
+const { getIncorrectQuestions, createIncorrectQuestionsQuiz } = useIncorrectQuestions()
 
 const loadQuizzes = async () => {
   await loadPremadeQuizzes()
@@ -83,6 +110,9 @@ const loadQuizzes = async () => {
   if (storedQuizzes) {
     quizzes.value = JSON.parse(storedQuizzes)
   }
+  
+  // Get incorrect questions count
+  incorrectQuestionsCount.value = getIncorrectQuestions().length
 }
 
 const deleteQuiz = (quizId) => {
@@ -98,6 +128,13 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric'
   })
+}
+
+const createIncorrectQuiz = () => {
+  const quiz = createIncorrectQuestionsQuiz()
+  if (quiz) {
+    loadQuizzes() // Refresh quiz list
+  }
 }
 
 onMounted(() => {

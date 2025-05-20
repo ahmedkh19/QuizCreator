@@ -136,6 +136,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, navigateTo } from '#app'
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import FormattedText from '~/components/FormattedText.vue'
+import { useIncorrectQuestions } from '~/composables/useIncorrectQuestions'
 
 const route = useRoute()
 const quiz = ref(null)
@@ -143,6 +144,7 @@ const currentQuestionIndex = ref(0)
 const selectedAnswer = ref(null)
 const showExplanation = ref(false)
 const userAnswers = ref([])
+const { addIncorrectQuestion } = useIncorrectQuestions()
 
 const currentQuestion = computed(() => {
   return quiz.value?.data.mcqs[currentQuestionIndex.value]
@@ -213,20 +215,51 @@ const checkAnswer = () => {
     question: currentQuestion.value.question,
     selected: selectedAnswer.value,
     correct: currentQuestion.value.correctAnswer,
-    isCorrect: isCorrect.value
+    isCorrect: isCorrect.value,
+    questionIndex: currentQuestionIndex.value,
+    choices: currentQuestion.value.choices
   }
+  
+  // If the answer is incorrect, add to incorrect questions
+  if (!isCorrect.value) {
+    addIncorrectQuestion({
+      quizId: quiz.value.id,
+      quizTitle: quiz.value.title,
+      question: currentQuestion.value.question,
+      choices: currentQuestion.value.choices,
+      correctAnswer: currentQuestion.value.correctAnswer,
+      explanation: currentQuestion.value.explanation
+    })
+  }
+  
   saveProgress()
 }
 
 const nextQuestion = () => {
   // Save answer if not already saved and answer is selected
   if (!userAnswers.value[currentQuestionIndex.value] && selectedAnswer.value) {
+    const isAnswerCorrect = selectedAnswer.value === currentQuestion.value.correctAnswer;
+    
     userAnswers.value[currentQuestionIndex.value] = {
       question: currentQuestion.value.question,
       selected: selectedAnswer.value,
       correct: currentQuestion.value.correctAnswer,
-      isCorrect: selectedAnswer.value === currentQuestion.value.correctAnswer,
-      skipped: !showExplanation.value // Mark if they skipped checking
+      isCorrect: isAnswerCorrect,
+      skipped: !showExplanation.value, // Mark if they skipped checking
+      questionIndex: currentQuestionIndex.value,
+      choices: currentQuestion.value.choices
+    }
+    
+    // If answer was incorrect and skipped explanation, still add to incorrect questions
+    if (!isAnswerCorrect && !showExplanation.value) {
+      addIncorrectQuestion({
+        quizId: quiz.value.id,
+        quizTitle: quiz.value.title,
+        question: currentQuestion.value.question,
+        choices: currentQuestion.value.choices,
+        correctAnswer: currentQuestion.value.correctAnswer,
+        explanation: currentQuestion.value.explanation
+      })
     }
   }
   
@@ -252,7 +285,9 @@ const finishQuiz = () => {
       selected: selectedAnswer.value,
       correct: currentQuestion.value.correctAnswer,
       isCorrect: selectedAnswer.value === currentQuestion.value.correctAnswer,
-      skipped: !showExplanation.value
+      skipped: !showExplanation.value,
+      questionIndex: currentQuestionIndex.value,
+      choices: currentQuestion.value.choices
     }
   }
   
